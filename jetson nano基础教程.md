@@ -12,11 +12,11 @@
 
 边缘计算的目的是将计算从数据中心移向网络边缘，利用智能设备、移动终端等代替云执行任务并提供服务。通过将服务移至“边缘”，缩短了应用的响应时间。
 
-![](.\FederatedLearning_FinalFiles_Flow Chart1.png)
+<img src=".\FederatedLearning_FinalFiles_Flow Chart1.png"  />
 
 Google提出的联合学习由手机设备下载当前模型，再通过手机上收集的数据学习并改进模型，然后将更新汇总为一个小的更新。使用加密通信将模型的更新上传到云，在云上将所有的更新汇总，以改善基础模型。所有的训练数据都保留在个人设备上，不会上传到云。
 
-![](.\2017-04-06.gif)
+<img src=".\2017-04-06.gif"  />
 
    * **速度和效率**
 
@@ -38,7 +38,7 @@ Google提出的联合学习由手机设备下载当前模型，再通过手机�
 
 <img src=".\0ab8eae1eac44adbc629971cfb8ed458.gif" style="zoom: 67%;" />
 
-![](.\image4.gif)
+<img src=".\image4.gif"  />
 
 背景虚化、重对焦......
 
@@ -82,7 +82,7 @@ Google提出的联合学习由手机设备下载当前模型，再通过手机�
 
 * 使用内置的编程语言来加速计算机代码的转换和执行
 
-![](.\性能对比.jpg)
+<img src=".\性能对比.jpg"  />
 
 
 
@@ -90,7 +90,7 @@ Google提出的联合学习由手机设备下载当前模型，再通过手机�
 
 NVIDIA Jetson Nano是英伟达推出的小型AI智能开发板，适用于嵌入式物联网应用或AI应用的开发。
 
-![](.\Jetson_Nano_Family.png)
+<img src=".\Jetson_Nano_Family.png"  />
 
 * Jetson Nano 模组仅有 70 x 45 毫米，是体积非常小巧的 Jetson 设备。 为多个行业（从智慧城市到机器人）的边缘设备部署 AI 时，此生产就绪型模组系统 (SOM) 可以提供强大支持。
 * Jetson Nano 提供 472 GFLOP，用于快速运行现代 AI 算法。 它可以并行运行多个神经网络，同时处理多个高分辨率传感器，非常适合入门级网络硬盘录像机 (NVR)、家用机器人以及具备全面分析功能的智能网关等应用。
@@ -122,15 +122,15 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
   https://www.sdcard.org/downloads/formatter/eula_windows/
   ```
 
-  ![](C:\Users\VictorLee\OneDrive\工作\人工智能\智能芯片\Jetson_Nano-Getting_Started-Windows-SD_Card_Formatter.png)
+  <img src="C:\Users\VictorLee\OneDrive\工作\人工智能\智能芯片\Jetson_Nano-Getting_Started-Windows-SD_Card_Formatter.png"  />
 
   如果是已写入镜像的或写入失败的sd卡，工具无法检测到。
 
-  ![](.\无法检测.PNG)
+  <img src=".\无法检测.PNG" style="zoom:80%;" />
 
   使用cmd命令重新创建分区
 
-  ![](.\cmd创建分区.PNG)
+  <img src=".\cmd创建分区.PNG"  />
 
 * **下载镜像写入工具，写入镜像**
 
@@ -138,15 +138,15 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
   https://www.balena.io/etcher/
   ```
 
-  ![](.\写入镜像1.PNG)
+  <img src=".\写入镜像1.PNG"  />
 
-  ![](.\写入镜像2.PNG)
+  <img src=".\写入镜像2.PNG"  />
 
-  ![](.\写入镜像3.PNG)
+  <img src=".\写入镜像3.PNG"  />
 
-  ![](.\写入镜像4.PNG)
+  <img src=".\写入镜像4.PNG"  />
 
-  ![](.\需要文件.PNG)
+  <img src=".\需要文件.PNG"  />
 
 * **插入SD卡，启动系统**
 
@@ -211,7 +211,8 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
 * **验证tensorflow**
 
   ```py
-  
+  import tensoflow as tf
+  print(tf.test.is_gpu_available())
   ```
 
   
