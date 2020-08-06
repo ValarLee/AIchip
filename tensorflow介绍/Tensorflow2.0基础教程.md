@@ -1,16 +1,16 @@
 # TensorFlow2.0基础教程
 
-## 一.深度学习
+## 一. 深度学习
 
 **深度学习**是机器学习领域中一个新的研究方向，它被引入机器学习使其更接近最初的目标——人工智能。它模仿人脑在处理数据和创建决策模式时的工作方式，利用层次化的人工神经网络从数据中学习模式。
 
 <img src="./image-20200803143914530.png">
 
-### 1.感知机
+### 1. 感知机
 
 <img src="./single_neural.jpg" style="zoom: 67%;" >
 
-### 2.深层神经网络
+### 2. 深层神经网络
 
 <img src="./neural_network.png" style="zoom:67%;" >
 
@@ -64,9 +64,9 @@ $$
 
 <img src="./1_HrFZV7pKPcc5dzLaWvngtQ.png" style="zoom:80%;" >
 
-## 二.TensorFlow基础
+## 二. TensorFlow基础
 
-### 1.计算模型
+### 1. 计算模型
 
 Tensorflow是一个通过计算图的形式来表述计算的系统。其中计算图上的每一个节点都代表一个计算，而节点之间的边描述了计算之间的依赖关系。
 
@@ -96,7 +96,7 @@ tensorboard --logdir=path
 
 Tensorflow通过tf.Graph()函数来定义计算图，每一张图拥有独立的张量和运算。如果不指定图，会使用默认图，通过tf.get_default_graph()函数可以获取当前的默认图。
 
-### 2.数据模型
+### 2. 数据模型
 
 **张量**：是对Tensorflow中运算结果的引用，在张量中并没有真正保存数字，它保存的是如何得到这些数字的计算过程。Tensor的内容不可变，只能创建新的Tensor。
 
@@ -122,7 +122,7 @@ tf.Variable:变量，需要其他节点传递值或者通过某些方法来初�
 tf.Variable(tf.random_normal((1,2),stddev=1,seed=1),name="d")
 ```
 
-### 3.运行模型
+### 3. 运行模型
 
 Tensorflow通过**会话**(Session)来执行在图中定义好的运算，会话拥有并管理Tensorflow运行时的所有资源。
 
@@ -212,7 +212,7 @@ writer = tf.summary.FileWriter("./log",tf.get_default_graph())
 writer.close()
 ```
 
-### 4.Keras
+### 4. Keras
 
 Keras是一个高级神经网络API，可以以Tensorflow、CNTK、Theano作为后端运行。利用此API，可以实现快速的模型设计和拓展。
 
@@ -255,7 +255,7 @@ func_model.compile(loss=CategoricalCrossentropy(),optimizer=SGD(learning_rate=0.
 func_model.fit(trainX,trainY,batch_size=100,epochs=10,validation_data=(testX,testY),callbacks=TensorBoard())
 ```
 
-### 5.Estimator
+### 5. Estimator
 
 TensorFlow从1.3版本开始也推出了高层API tf.estimator,它更好地整合了TensorFlow的原生功能。
 
@@ -351,9 +351,9 @@ logits = tf.layers.dense(inputs=dropout, units=10)
 
 
 
-## 三.TensorFlow2.0
+## 三. TensorFlow2.0
 
-### 1.Eager execution
+### 1. Eager execution
 
 Tensorflow的Eager execution类似Pytorch的动态图机制，可以立刻执行操作无需构建图：会立即返回具体计算值而不是构建计算图之后再运行图，这使得调试模型和使用TensorFlow更加简单。
 
@@ -438,7 +438,7 @@ for i in range(steps):
         print("w:{:.3f} b:{:.3f}".format(model.W.numpy(), model.B.numpy()))
 ```
 
-### 2.function
+### 2. function
 
 Eager execution虽然带来了更加灵活的操作，但会牺牲性能和可部署性。
 
@@ -510,9 +510,100 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 print("accuracy: ",accuracy)
 ```
 
-### 3.keras
+### 3. keras
 
-子类化
+子类化：model subclasssing
 
-### 4.并行计算
+Model是keras中所有模型架构的根类，因为keras面向对象编程的特性，我们可以通过继承Model类来自定义我们的网络结构。自定义前向传播的过程，自定义损失函数，自定义评估指标......，使用起来更加灵活。	
+
+```python
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras.datasets.mnist import load_data
+
+class MyDNN(tf.keras.Model):
+    def __init__(self):
+        super(MyDNN, self).__init__()
+        self.layer1 = tf.keras.layers.Dense(500,activation="relu")
+        self.layer2 = tf.keras.layers.Dense(10,activation="softmax")
+        self.accuracy_fn = tf.keras.metrics.CategoricalAccuracy()
+        self.loss_fn = tf.keras.losses.CategoricalCrossentropy()
+    
+    def call(self, input_data, training=None):
+        inputs, targets = input_data
+        x = self.layer1(inputs)
+        x = self.layer2(x)
+        
+        self.add_loss(self.loss_fn(targets,x))
+        
+        acc = self.accuracy_fn(targets, x)
+        self.add_metric(acc, name="accuracy")
+        
+        return x
+
+model = MyDNN()
+mnist = load_data("mnist.npz")
+trainX, trainY = np.reshape(mnist[0][0],[-1,784]).astype(np.float32),np.eye(10)[mnist[0][1]]
+testX, testY = np.reshape(mnist[1][0],[-1,784]).astype(np.float32), np.eye(10)[mnist[1][1]] 
+
+model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01))
+model.fit((trainX,trainY), trainY,batch_size=100,epochs=20)
+```
+
+### 4. 并行计算
+
+TensorFlow2.0为多GPU、多机器及TPU的并行计算提供了更便捷和更完善的API支持。
+
+| Training API             | MirroredStrategy | TPUStrategy   | MultiWorkerMirroredStrategy | CentralStorageStrategy | ParameterServerStrategy    |
+| ------------------------ | ---------------- | ------------- | --------------------------- | ---------------------- | -------------------------- |
+| **Keras API**            | Supported        | Supported     | Experimental support        | Experimental support   | Supported planned post 2.3 |
+| **Custom training loop** | Supported        | Supported     | Experimental support        | Experimental support   | Supported planned post 2.3 |
+| **Estimator API**        | Limited Support  | Not supported | Limited Support             | Limited Support        | Limited Support            |
+
+* MirroredStrategy：镜像策略，支持在一台机器上的多个GPU上的同步分布式训练。变量在GPU间共享复制。
+* TPUStrategy：TPU策略
+* MultiWorkerMirroredStrategy：多设备镜像策略，支持跨设备的同步分布式训练，每台设备可以有多个GPU。
+* CentralStorageStrategy：变量存储在CPU，计算在
+* ParameterServerStrategy:参数服务器策略支持在多台计算机间进行分布式训练。一部分作为计算服务器，一部分作为参数服务器。
+
+
+
+```python
+import tensorflow as tf
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Dense, ReLU, Input
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.losses import CategoricalCrossentropy
+from tensorflow.keras.datasets.mnist import load_data
+
+import numpy as np
+import os
+import json
+
+def build_model():
+    seq_model = Sequential()
+    seq_model.add(Dense(500,activation="relu",input_shape=(784,)))
+    seq_model.add(Dense(10,activation="softmax"))
+    return seq_model
+
+os.environ['TF_CONFIG'] = json.dumps({
+    'cluster': {
+        'worker': ["localhost:12345", "localhost:23456"]
+    },
+    'task': {'type': 'worker', 'index': 0}
+})
+
+mm_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+
+mnist = load_data("mnist.npz")
+trainX, trainY = np.reshape(mnist[0][0],[-1,784]),np.eye(10)[mnist[0][1]]
+testX, testY = np.reshape(mnist[1][0],[-1,784]), np.eye(10)[mnist[1][1]] 
+
+with mm_strategy.scope():
+    model = build_model()
+    model.compile(loss=CategoricalCrossentropy(),optimizer=SGD(learning_rate=0.005),metrics="accuracy")
+model.fit(trainX,trainY,batch_size=100,epochs=10,validation_data=(testX,testY))
+```
+
+
 
