@@ -76,13 +76,13 @@ Flow: "流"，表示张量之间通过计算相互转换的过程
 
 ```python
 import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+tf.disable_v2_behavior() # 禁用2.x特性，使用1.x
 
 a = tf.constant([1.0,2.0],name="a")
 b = tf.constant([2.0,3.0],name="b")
 c = tf.sqrt(a*b)
 
-writer = tf.summary.FileWriter("./log",tf.get_default_graph())
+writer = tf.summary.FileWriter("./log",tf.get_default_graph()) # 保存训练过程
 writer.close()
 ```
 
@@ -146,16 +146,16 @@ from tensorflow.keras.datasets.mnist import load_data
 
 import numpy as np
 
-INPUT_NODE = 784
-OUTPUT_NODE = 10
-LAYER1_NODE = 500
+INPUT_NODE = 784 # 输入层
+OUTPUT_NODE = 10 # 输出层
+LAYER1_NODE = 500 # 隐藏层
 
 def get_weight_variable(shape):
-    weights = tf.get_variable("weights", shape, initializer = tf.truncated_normal_initializer(stddev=0.1))
+    weights = tf.get_variable("weights", shape, initializer = tf.truncated_normal_initializer(stddev=0.1)) # 截断正态分布，2倍标准差以内
     return weights
 
 def inference(input_tensor):
-    with tf.variable_scope('layer1'):
+    with tf.variable_scope('layer1'): # layer1/biases:0
         weights = get_weight_variable([INPUT_NODE, LAYER1_NODE])
         biases = tf.get_variable("biases", [LAYER1_NODE], initializer = tf.constant_initializer(0.0))
         layer1 = tf.nn.relu(tf.matmul(input_tensor, weights) + biases)
@@ -181,13 +181,13 @@ def train(mnist):
     mnist_x = np.reshape(mnist[0][0],[-1,784])
     mnist_y = np.eye(10)[mnist[0][1]]
     
-    test_feed = {x: np.reshape(mnist[1][0],[-1,784]),y_: np.eye(10)[mnist[1][1]]}
+    test_feed = {x: np.reshape(mnist[1][0],[-1,784]), y_: np.eye(10)[mnist[1][1]]}
     
     global_step = tf.Variable(0, trainable=False)
     
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y, labels=tf.argmax(y_, 1))
     loss = tf.reduce_mean(cross_entropy)
-    learning_rate = tf.train.exponential_decay(LEARNING_RATE_BASE, global_step,train_size / BATCH_SIZE, LEARNING_RATE_DECAY)
+    learning_rate = tf.train.exponential_decay(LEARNING_RATE_BASE, global_step,train_size / BATCH_SIZE, LEARNING_RATE_DECAY) # decayed_learning_rate = learning_rate * decay_rate ^ (global_step / decay_steps)
     train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
     
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
@@ -273,14 +273,18 @@ TensorFlow从1.3版本开始也推出了高层API tf.estimator,它更好地整�
 
   特征列是一个对象，用于描述模型应该如何使用特征字典中的原始输入数据。当您构建一个 Estimator 模型的时候，您会向其传递一个特征列的列表，其中包含您希望模型使用的每个特征。
 
-* **实例化Estimator**
+  ```
+  https://developers.googleblog.com/2017/11/introducing-tensorflow-feature-columns.html
+  ```
+
+* **实例化Estimator，指定超参数**
 
 * **调用训练、评估和预测**
 
 ```python
 import tensorflow as tf
 from tensorflow.keras.datasets.mnist import load_data
-from tensorflow.python.data import Dataset
+from tensorflow.data import Dataset
 
 import numpy as np
 

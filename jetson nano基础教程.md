@@ -122,7 +122,7 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
   https://www.sdcard.org/downloads/formatter/eula_windows/
   ```
 
-  <img src="C:\Users\VictorLee\OneDrive\工作\人工智能\智能芯片\Jetson_Nano-Getting_Started-Windows-SD_Card_Formatter.png"  />
+  <img src=".\Jetson_Nano-Getting_Started-Windows-SD_Card_Formatter.png"  />
 
   如果是已写入镜像的或写入失败的sd卡，工具无法检测到。
 
@@ -167,7 +167,8 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
 * **切换软件apt源**
 
   ```bash
-  vim /etc/apt/sources.list
+  sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+  sudo vim /etc/apt/sources.list
   ```
 
   ```
@@ -204,15 +205,165 @@ Neuralet https://www.youtube.com/watch?v=n90W5AcCk34
   sudo apt-get install libhdf5-serial-dev hdf5-tools libhdf5-dev zlib1g-dev zip libjpeg8-dev liblapack-dev libblas-dev gfortran
   sudo apt-get install python3-pip
   sudo pip3 install -U pip
-  sudo pip3 install -U pip testresources setuptools numpy==1.16.1 future==0.17.1 mock==3.0.5 h5py==2.9.0 keras_preprocessing==1.0.5 keras_applications==1.0.8 gast==0.2.2 futures protobuf pybind11
+  sudo pip3 install -U testresources setuptools numpy==1.16.1 future==0.17.1 mock==3.0.5 h5py==2.9.0 keras_preprocessing==1.0.5 keras_applications==1.0.8 gast==0.2.2 futures protobuf pybind11
   sudo pip3 install --pre --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v44 tensorflow==2.2.0+nv20.6
   ```
 
 * **验证tensorflow**
 
-  ```py
+  ```python
   import tensoflow as tf
   print(tf.test.is_gpu_available())
   ```
 
+* **安装jetson-stats**
+
+  ```bash
+  sudo pip3 install jetson-stats
+  ```
+
+  ```bash
+  # 查看设备cpu、gpu使用状况等
+  sudo jtop
+  ```
+
   
+
+
+## 四.其他可能问题
+
+### 1.安装jupyter时报错“command 'aarch64-linux-gnu-gcc' failed with exit status 1”
+
+```bash
+sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev libffi-dev libssl-dev
+```
+
+
+
+### 2.安装opencv
+
+https://pysource.com/2019/08/26/install-opencv-4-1-on-nvidia-jetson-nano/
+
+https://www.pyimagesearch.com/2020/02/03/how-to-use-opencvs-dnn-module-with-nvidia-gpus-cuda-and-cudnn/
+
+```bash
+sudo apt-get install zram-config
+
+sudo vim /usr/bin/init-zram-swapping
+# 将mem=$(((totalmem / 2 / ${NRDEVICES}) * 1024)) 修改为 mem=$(((totalmem / ${NRDEVICES}) * 1024))，，然后重启机器
+```
+
+```bash
+sudo vim /etc/apt/sources.list
+# 替换apt源
+
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic main multiverse restricted universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-security main multiverse restricted universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-updates main multiverse restricted universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-backports main multiverse restricted universe
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic main multiverse restricted universe
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-security main multiverse restricted universe
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-updates main multiverse restricted universe
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ bionic-backports main multiverse restricted universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
+```
+
+```bash
+sudo apt-get update
+sudo apt install -y curl
+sudo apt install -y libjpeg-dev libpng-dev libtiff-dev libjasper-dev 
+sudo apt install -y libavcodec-dev libavformat-dev libswscale-dev
+sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt install -y libv4l-dev v4l-utils qv4l2 v4l2ucp libdc1394-22-dev
+sudo apt install -y libxvidcore-dev libx264-dev
+sudo apt install -y libgtk-3-dev
+sudo apt install -y libatlas-base-dev gfortran
+```
+
+```bash
+# md5 6757245aec18afe6ee649f2d0d20d092  https://versaweb.dl.sourceforge.net/project/opencvlibrary/4.3.0/OpenCV%204.3.0.zip
+curl -L https://github.com/opencv/opencv/archive/4.3.0.zip -o opencv-4.3.0.zip
+# md5 d1057144d0cd6f40628088549f8dc1a1  https://d.serctl.com/?uuid=cf624cc9-cac7-49e7-8605-6cdda94dd7a8
+curl -L https://github.com/opencv/opencv_contrib/archive/4.3.0.zip -o opencv_contrib-4.3.0.zip
+```
+
+```bash
+unzip opencv-4.3.0.zip 
+unzip opencv_contrib-4.3.0.zip 
+cd opencv-4.3.0/
+mkdir release
+cd release/
+```
+
+```
+可提前下载face_landmark_model.dat
+https://github.com/opencv/opencv_3rdparty/tree/contrib_face_alignment_20170818
+vim /{}/opencv_contrib/modules/face/CMakeLists.txt 
+将原有http链接置换为file:///下载目录/
+```
+
+```bash
+cmake   -D WITH_CUDA=ON \
+		-D WITH_CUDNN=ON \
+		-D OPENCV_DNN_CUDA=ON \
+		-D ENABLE_FAST_MATH=1 \
+		-D CUDA_FAST_MATH=1 \
+		-D CUDA_ARCH_BIN=5.3 \
+		-D WITH_CUBLAS=1 \
+        -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.3.0/modules \
+        -D WITH_GSTREAMER=ON \
+        -D WITH_LIBV4L=ON \
+        -D BUILD_opencv_python2=OFF \
+        -D BUILD_opencv_python3=ON \
+        -D BUILD_TESTS=OFF \
+        -D BUILD_PERF_TESTS=OFF \
+        -D BUILD_EXAMPLES=OFF \
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D CMAKE_INSTALL_PREFIX=/usr/local ..
+```
+
+```bash
+make -j4
+sudo make install
+```
+
+
+
+### 3.代理使用
+
+* 安装**privoxy**（转发socks代理为http代理）
+
+  ```bash
+  sudo apt-get install privoxy
+  ```
+
+* 修改privoxy配置文件
+
+  ```bash
+  vim /etc/privoxy/config
+  # 添加以下内容
+  forward-socks5t   /   127.0.0.1:1080 .
+  ```
+
+* 启动privoxy
+
+  ```bash
+  sudo systemctl start privoxy
+  ```
+
+* 临时设置系统代理
+
+  ```bash
+  export http_proxy=http://127.0.0.1:8118
+  export https_proxy=http://127.0.0.1:8118
+  ```
+
+* apt启用代理（curl，wget不需要额外设置）
+
+  ```bash
+  sudo apt-get -o Acquire::http::proxy="http://127.0.0.1:8118/" update
+  ```
+
+  
+
