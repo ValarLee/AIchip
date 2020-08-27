@@ -304,6 +304,13 @@ vim /{}/opencv_contrib/modules/face/CMakeLists.txt
 ```
 
 ```bash
+# cudnn 8存储版本的头文件变更导致原有的cmake会找不到cudnn
+vim opencv-4.3.0/cmake/FindCUDNN.cmake
+修改 file(READ "${CUDNN_INCLUDE_DIR}/cudnn.h" CUDNN_H_CONTENTS)
+为  file(READ "${CUDNN_INCLUDE_DIR}/cudnn_version.h" CUDNN_H_CONTENTS)
+```
+
+```bash
 cmake   -D WITH_CUDA=ON \
 		-D WITH_CUDNN=ON \
 		-D OPENCV_DNN_CUDA=ON \
